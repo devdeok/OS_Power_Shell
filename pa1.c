@@ -42,6 +42,7 @@ static int run_command(int nr_tokens, char *tokens[])
 {
 	if (strcmp(tokens[0], "exit") == 0) return 0;
 
+	fprintf(stderr, "Unable to execute %s\n", tokens[0]);
 	return -EINVAL;
 }
 
@@ -118,12 +119,10 @@ static const char *__color_end = "[0m";
 
 static void __print_prompt(void)
 {
-	char *cwd;
+	char *prompt = "$";
 	if (!__verbose) return;
 
-	cwd = get_current_dir_name();
-	fprintf(stderr, "%s%s%s$ ", __color_start, cwd, __color_end);
-	free(cwd);
+	fprintf(stderr, "%s%s%s ", __color_start, prompt, __color_end);
 }
 
 /***********************************************************************
@@ -163,10 +162,6 @@ int main(int argc, char * const argv[])
 		ret = __process_command(command);
 
 		if (!ret) break;
-
-		if (ret < 0) {
-			fprintf(stderr, "Error: %d\n", ret);
-		}
 	}
 
 	finalize(argc, argv);
