@@ -74,7 +74,7 @@ Let's build my powerful shell with those system calls.
 
 - Each user has one's *home directory* which is denoted by `~`. The actual path is defined in `$HOME` environment variable. Make `cd` command to understand it
 
-- ```bash
+  ```bash
   $ pwd
   /home/directory/of/your/account  # Assume this is the home directory of the user
   $ cd /somewhere/i/dont/know
@@ -115,40 +115,40 @@ Let's build my powerful shell with those system calls.
 	...
 	$ cat types.h parser.h
 	$ history
-   0: ls
-   1: cp pa1.c temp.c
-   2: ls -al
-   3: cat types.h parser.h
-   4: history
+	 0: ls
+	 1: cp pa1.c temp.c
+	 2: ls -al
+	 3: cat types.h parser.h
+	 4: history
 	$ ! 0   # Rerun 0-th command in the history, which is "ls".
 	list_head.h  Makefile  pa1-backup.c  pa1.c  pa1.o  parser.c  parser.h  parser.o  posh  README.md  subdir  temp.c  testcases  toy  toy.c  toy.o	types.h
 	$ history
 	 0: ls
-   1: cp pa1.c temp.c
-   2: ls -al
-   3: cat types.h parser.h
-   4: history
-   5: ! 0
-   6: history
+	 1: cp pa1.c temp.c
+	 2: ls -al
+	 3: cat types.h parser.h
+	 4: history
+	 5: ! 0
+	 6: history
 	$ ! 4   # 4-th command in the history is "history"
-   0: ls
-   1: cp pa1.c temp.c
-   2: ls -al
-   3: cat types.h parser.h
-   4: history
-   5: ! 0
-   6: history
-   7: ! 4
+	 0: ls
+	 1: cp pa1.c temp.c
+	 2: ls -al
+	 3: cat types.h parser.h
+	 4: history
+	 5: ! 0
+	 6: history
+	 7: ! 4
 	$ ! 7  # 7-th entry is "! 4", which is "history"
-   0: ls
-   1: cp pa1.c temp.c
-   2: ls -al
-   3: cat types.h parser.h
-   4: history
-   5: ! 0
-   6: history
-   7: ! 4
-   8: ! 7
+	 0: ls
+	 1: cp pa1.c temp.c
+	 2: ls -al
+	 3: cat types.h parser.h
+	 4: history
+	 5: ! 0
+	 6: history
+	 7: ! 4
+	 8: ! 7
 	$
 	```
 - Hint: Recall the exercise done as PA0.
