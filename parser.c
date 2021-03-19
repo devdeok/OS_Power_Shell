@@ -18,7 +18,7 @@
 
 #include "types.h"
 #include "parser.h"
-
+ 
 int parse_command(char *command, int *nr_tokens, char *tokens[])
 {
 	char *curr = command;

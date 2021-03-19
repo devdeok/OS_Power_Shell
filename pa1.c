@@ -66,6 +66,7 @@ LIST_HEAD(history);
 static void append_history(char * const command)
 {
 
+
 }
 
 
@@ -82,6 +83,7 @@ static void append_history(char * const command)
  */
 static int initialize(int argc, char * const argv[])
 {
+	
 	return 0;
 }
 

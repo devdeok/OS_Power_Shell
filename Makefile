@@ -17,7 +17,7 @@ toy: toy.o
 .PHONY: clean
 clean:
 	rm -rf $(TARGET) toy *.o *.dSYM
-
+ 
 
 .PHONY: test-run
 test-run: $(TARGET) toy testcases/test-run

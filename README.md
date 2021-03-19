@@ -9,7 +9,7 @@ Let's build my powerful shell with those system calls.
 
 ### Background
 - *Shell* is a program that interpretes user inputs, and processes them accordingly. The example includes the Command Prompt in Windows, Bourne Shell in Linux, zsh in macOSX, so forth.
-
+ 
 - An user can input a command by writing a sentence on the shell and press the "Enter" key. Upon receiving the input, the shell parses the requests into command *tokens*, and diverges execution according to the first token.
 
 - The shell *always* assumes that the first token is the filename of the executable file to run except for `cd`, `history`, and `!` (see belows for the descriptions of those). The shell executes the executable with the rest of the tokens as the arguments. For example, if an user inputs `ls -al /home/sce213`, the shell will execute `ls` executable with `-al` and `/home/sce213` as its arguments. The shell may execute the executable using the -p variant of the `exec()` system call family so that the executable file is automatically checked from the *`$PATH`* environment variable.
