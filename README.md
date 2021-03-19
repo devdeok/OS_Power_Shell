@@ -16,7 +16,7 @@ Let's build my powerful shell with those system calls.
 
 
 ### Problem Specification
-- The shell program `posh` (**PO**werful **SH**ell) awaits your command line input after printing out "$" as the prompt. When you enter a line of command, the framework tokenizes the the command line with `parse_command()` function, and the framework calls `run_command()` function with the tokens. You need to implement following features starting in `run_command()`.
+- The shell program `posh` (**PO**werful **SH**ell) awaits your command line input after printing out "$" as the prompt. When you enter a line of command, the framework tokenizes the command line with `parse_command()` function, and the framework calls `run_command()` function with the tokens. You need to implement following features starting in `run_command()`.
 
 - Currently, the shell keeps getting input commands and processes them until the user enters `exit`. In that case, the shell program exits.
 
