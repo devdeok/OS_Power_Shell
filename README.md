@@ -157,7 +157,7 @@ Let's build my powerful shell with those system calls.
 #### Connect two processes with a pipe (100 pts)
 - As we discussed in the class, we can connect two processes with an ordinary pipe. Implement this feature.
 
-- The user may enter two commands with the pipe symbol `|`. All output of the first command should be carried to the second command.
+- The user may enter two commands with the pipe symbol `|` in between. All output of the first command should be carried to the input of the second command.
 
   ```bash
 	$ cat pa1.c | sort -n
@@ -183,14 +183,14 @@ Let's build my powerful shell with those system calls.
 - Source: ***pa1.c*** (220 pts in total)
   - Points will be prorated by testcase results.
 - Document: ***One PDF document*** (30 pts). It should include **ALL** the followings;
-  - Outline how programs are launched and how arguments are passed
+	- Outline how programs are launched and how arguments are passed
 	- How the command history is maintained and recalled later
 	- Your ***STRATEGY*** to implement the pipe
-  - AND lessons learned
-  - NO MORE THAN ***FOUR*** PAGES
-  - DO NOT INCLUDE COVER PAGE, YOUR NAME, NOR STUDENT ID
-  - YOU WILL GET 0 pts for documentation if you do not comply the statements
-  - Surprisingly, the instructor knows C syntax; you will not get a good point if you just READ code on the document.
+	- AND lessons learned
+	- NO MORE THAN ***FOUR*** PAGES
+	- DO NOT INCLUDE COVER PAGE, YOUR NAME, NOR STUDENT ID
+	- YOU WILL GET 0 pts for documentation if you do not comply the statements
+	- Surprisingly, the instructor knows C syntax; you will not get a good point if you just READ code on the document.
 - Git repository URL at git.ajou.ac.kr (10 pts)
   - To get the points, you should actually use the repository to manage your code (i.e., have more than two commits which are hours aparts). You will not get any point if you just committed your final code or the repository is not properly cloned.
 	- How to create your repository to submit:

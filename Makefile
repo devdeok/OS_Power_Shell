@@ -23,22 +23,17 @@ clean:
 test-run: $(TARGET) toy testcases/test-run
 	./$< -q < testcases/test-run
 
-.PHONY: test-timeout
-test-timeout: $(TARGET) toy testcases/test-timeout
-	./$< -q < testcases/test-timeout
-
 .PHONY: test-cd
 test-cd: $(TARGET) testcases/test-cd
 	./$< -q < testcases/test-cd
 
-.PHONY: test-for
-test-for: $(TARGET) testcases/test-for
-	./$< -q < testcases/test-for
+.PHONY: test-history
+test-cd: $(TARGET) testcases/test-history
+	./$< -q < testcases/test-history
 
-.PHONY: test-prompt
-test-prompt: $(TARGET) testcases/test-prompt
-	./$< < testcases/test-prompt
+.PHONY: test-pipe
+test-cd: $(TARGET) testcases/test-pipe
+	./$< -q < testcases/test-pipe
 
-
-test-all: test-run test-timeout test-cd test-for test-prompt
+test-all: test-run test-cd test-history test-pipe
 	echo
