@@ -43,24 +43,40 @@
 
 static int run_command(int nr_tokens, char *tokens[])
 {
-	// history에서
+	// cd ~랑 cd <경로> 구현하기
+	// ! <숫자> 구현하기 -> pa0참조
+	// pipe 구현하기 |
 	pid_t pid;
 	int status;
-
+	
 	if (strcmp(tokens[0], "exit") == 0) return 0; //command가 exit이면 종료
+
+	else if (!strcmp(tokens[0],"cd")){
+		
+
+		if(!strcmp(tokens[1],"~")){
+			chdir(getenv("HOME"));
+			printf("나는 cd다 우하하\n");
+		}
+		else{
+			chdir(tokens[1]);
+			printf("이동!!\n");
+		}
+			
+
+	}
 	else{
         if((pid = fork()) < 0){
             fprintf(stderr,"fork error");
         }
         else if(pid == 0){ // 자식의 경우
-            execvp(*tokens, tokens);
+            execvp(*tokens, tokens); // (file, 배열)
             fprintf(stderr,"couldn't execute: %s\n", tokens);
-            exit(127);
+            return 1;
         }
 		// 부모의 경우
         if((pid = waitpid(pid, &status, 0)) < 0)
 			fprintf(stderr, "waitpid error\n");
-			return 1;
 	}
 	
 	return -EINVAL;
@@ -87,6 +103,7 @@ static void append_history(char * const command)
 {
 	// history를 linked list로 구현해서 안에 command 쌓아나가기
 	
+	
 }
 
 
@@ -103,7 +120,7 @@ static void append_history(char * const command)
  */
 static int initialize(int argc, char * const argv[])
 {
-	
+
 	return 0;
 }
 
