@@ -38,11 +38,41 @@
  *   Return 0 when user inputs "exit"
  *   Return <0 on error
  */
+
+#include <wait.h>
+
 static int run_command(int nr_tokens, char *tokens[])
 {
-	if (strcmp(tokens[0], "exit") == 0) return 0;
+	// history에서
+	pid_t pid;
+	int status;
+	int i=3;
 
-	fprintf(stderr, "Unable to execute %s\n", tokens[0]);
+	if (strcmp(tokens[0], "exit") == 0) return 0; //command가 exit이면 종료
+	else{
+		while(i){
+
+        if(*tokens[nr_tokens-1] == '\n'){
+            tokens[nr_tokens-1] = 0;
+        }
+
+        if((pid = fork()) < 0){
+            fprintf(stderr,"fork error");
+        }
+        else if(pid == 0){ // 자식의 경우
+            execlp(*tokens, *tokens,(char*)0);
+            fprintf(stderr,"couldn't execute: %s\n", tokens);
+            exit(127);
+        }
+		// 부모의 경우
+        if((pid = waitpid(pid, &status, 0)) < 0)
+            fprintf(stderr, "waitpid error");
+
+        if(strcmp(*tokens,"exit")==0) return 0;
+		i--;
+    	}
+	}
+	
 	return -EINVAL;
 }
 
@@ -65,8 +95,8 @@ LIST_HEAD(history);
  */
 static void append_history(char * const command)
 {
-
-
+	// history를 linked list로 구현해서 안에 command 쌓아나가기
+	
 }
 
 
