@@ -43,41 +43,44 @@
 
 static int run_command(int nr_tokens, char *tokens[])
 {
-	// cd ~랑 cd <경로> 구현하기
 	// ! <숫자> 구현하기 -> pa0참조
 	// pipe 구현하기 |
 	pid_t pid;
 	int status;
-	
+
 	if (strcmp(tokens[0], "exit") == 0) return 0; //command가 exit이면 종료
 
-	else if (!strcmp(tokens[0],"cd")){
-		
+	else if (!strcmp(tokens[0],"cd")){ // implement change directory(cd)
+		if(nr_tokens > 1){ // cd ~~
+			if(!strcmp(tokens[1],"~")){ // 홈디렉토리로 이동
+				chdir(getenv("HOME"));
+			}
+			else if(!strcmp(tokens[1],"..")){ // 상위 디렉토리로 이동
+				chdir("..");
+			}
+			else{ // 디렉토리를 입력했을 때
+				chdir(tokens[1]);
+			}
+		}// nr_tokens > 1
 
-		if(!strcmp(tokens[1],"~")){
-			chdir(getenv("HOME"));
-			printf("나는 cd다 우하하\n");
-		}
-		else{
-			chdir(tokens[1]);
-			printf("이동!!\n");
-		}
-			
+		else{ // cd만 입력했을 경우
+				chdir(getenv("HOME"));
+		}// else
+	}//  implement change directory(cd)
 
-	}
-	else{
+	else{ // implement external command
         if((pid = fork()) < 0){
             fprintf(stderr,"fork error");
         }
         else if(pid == 0){ // 자식의 경우
             execvp(*tokens, tokens); // (file, 배열)
-            fprintf(stderr,"couldn't execute: %s\n", tokens);
+            fprintf(stderr,"Unable to execute %s\n", *tokens);
             return 1;
         }
 		// 부모의 경우
         if((pid = waitpid(pid, &status, 0)) < 0)
 			fprintf(stderr, "waitpid error\n");
-	}
+	} // implement external command
 	
 	return -EINVAL;
 }
@@ -102,7 +105,11 @@ LIST_HEAD(history);
 static void append_history(char * const command)
 {
 	// history를 linked list로 구현해서 안에 command 쌓아나가기
-	
+	// pa0 참고하면 좋을듯
+	// 리스트헤드의 항목으로 char*넣어서 command저장하기
+	// 명령어는 ! <숫자> 숫자에 있는 command 실행
+
+
 	
 }
 
