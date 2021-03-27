@@ -25,6 +25,25 @@
 #include "list_head.h"
 #include "parser.h"
 
+#include <wait.h>
+
+/***********************************************************************
+ * struct list_head history
+ *
+ * DESCRIPTION
+ *   Use this list_head to store unlimited command history.
+ */
+LIST_HEAD(history);
+
+struct entry{	
+	struct list_head list;
+	char* history_command;
+	int history_num;
+};
+
+struct entry *cursor;
+struct entry *cursorn;
+int tempint = 1;
 
 /***********************************************************************
  * run_command()
@@ -38,11 +57,7 @@
  *   Return 0 when user inputs "exit"
  *   Return <0 on error
  */
-
-#include <wait.h>
-
-static int run_command(int nr_tokens, char *tokens[])
-{
+static int run_command(int nr_tokens, char *tokens[]){
 	// ! <숫자> 구현하기 -> pa0참조
 	// pipe 구현하기 |
 	pid_t pid;
@@ -50,50 +65,51 @@ static int run_command(int nr_tokens, char *tokens[])
 
 	if (strcmp(tokens[0], "exit") == 0) return 0; //command가 exit이면 종료
 
-	else if (!strcmp(tokens[0],"cd")){ // implement change directory(cd)
+	else if (!strcmp(tokens[0],"cd")){ // 		implement change directory(cd)
 		if(nr_tokens > 1){ // cd ~~
-			if(!strcmp(tokens[1],"~")){ // 홈디렉토리로 이동
+			if(!strcmp(tokens[1],"~")){ // move home directory
 				chdir(getenv("HOME"));
 			}
-			else if(!strcmp(tokens[1],"..")){ // 상위 디렉토리로 이동
+			else if(!strcmp(tokens[1],"..")){ // 상위 directory로 이동
 				chdir("..");
 			}
-			else{ // 디렉토리를 입력했을 때
+			else{ // input specify directory
 				chdir(tokens[1]);
 			}
-		}// nr_tokens > 1
-
-		else{ // cd만 입력했을 경우
+		}
+		else{ //cd만 입력했을 경우
 				chdir(getenv("HOME"));
-		}// else
-	}//  implement change directory(cd)
+		}
+	}//  										implement change directory(cd)
 
-	else{ // implement external command
+	else if(!strcmp(tokens[0],"history")){ //	implement history
+		list_for_each_entry(cursor,&history,list){
+			fprintf(stderr,"%d: %s",cursor->history_num,cursor->history_command);
+		}
+	}//											implement history
+
+	else if(!strcmp(tokens[0],"!")){//			implement !
+		list_for_each_entry_safe(cursor,cursorn,&history,list){ // 끝까지 순회
+			
+		}
+	}//											implement !
+
+	else{ // 									implement external command
         if((pid = fork()) < 0){
             fprintf(stderr,"fork error");
         }
-        else if(pid == 0){ // 자식의 경우
-            execvp(*tokens, tokens); // (file, 배열)
+        else if(pid == 0){ // childe process
+            execvp(*tokens, tokens); // (file, array)
             fprintf(stderr,"Unable to execute %s\n", *tokens);
             return 1;
         }
-		// 부모의 경우
-        if((pid = waitpid(pid, &status, 0)) < 0)
+		
+        if((pid = waitpid(pid, &status, 0)) < 0) // parent process
 			fprintf(stderr, "waitpid error\n");
-	} // implement external command
+	} // 										implement external command
 	
 	return -EINVAL;
 }
-
-
-/***********************************************************************
- * struct list_head history
- *
- * DESCRIPTION
- *   Use this list_head to store unlimited command history.
- */
-LIST_HEAD(history);
-
 
 /***********************************************************************
  * append_history()
@@ -108,9 +124,19 @@ static void append_history(char * const command)
 	// pa0 참고하면 좋을듯
 	// 리스트헤드의 항목으로 char*넣어서 command저장하기
 	// 명령어는 ! <숫자> 숫자에 있는 command 실행
-
-
 	
+
+	char* tempstr = malloc(sizeof(char)*MAX_COMMAND_LEN);
+	strcpy(tempstr, command);
+
+	struct entry *temp = (struct entry *)malloc(sizeof(struct list_head));
+	temp->history_command = (char*)malloc(sizeof(char)*(strlen(command)));
+
+	temp->history_num = tempint;
+	strcpy(temp->history_command,tempstr);
+	INIT_LIST_HEAD(&temp->list);
+	list_add_tail(&temp->list, &history);
+	tempint++;
 }
 
 
