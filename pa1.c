@@ -43,7 +43,7 @@ struct entry{
 
 struct entry *cursor;
 struct entry *cursorn;
-int tempint = 1;
+int tempint = 0;
 
 static int __process_command(char * command);
 /***********************************************************************
@@ -64,15 +64,14 @@ static int run_command(int nr_tokens, char *tokens[]){
 	pid_t pid;
 	int status;
 
+	fprintf(stderr,"%d %s %s  \n",nr_tokens,tokens[0],tokens[1]);
+
 	if (strcmp(tokens[0], "exit") == 0) return 0; //command가 exit이면 종료
 
-	else if (!strcmp(tokens[0],"cd")){ // 		implement change directory(cd)
+	else if (!strcmp(tokens[0],"cd")){ // 		implement change directory
 		if(nr_tokens > 1){ // cd ~~
 			if(!strcmp(tokens[1],"~")){ // move home directory
 				chdir(getenv("HOME"));
-			}
-			else if(!strcmp(tokens[1],"..")){ // 상위 directory로 이동
-				chdir("..");
 			}
 			else{ // input specify directory
 				chdir(tokens[1]);
@@ -81,11 +80,11 @@ static int run_command(int nr_tokens, char *tokens[]){
 		else{ //cd만 입력했을 경우
 				chdir(getenv("HOME"));
 		}
-	}//  										implement change directory(cd)
+	}//  										implement change directory
 
 	else if(!strcmp(tokens[0],"history")){ //	implement history
 		list_for_each_entry(cursor,&history,list){
-			fprintf(stderr,"%2d: %s",cursor->history_num,cursor->history_command);
+			fprintf(stderr,"%2d: %s asd  \n",cursor->history_num, cursor->history_command);
 		}
 	}//											implement history
 
