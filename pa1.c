@@ -84,7 +84,7 @@ static int run_command(int nr_tokens, char *tokens[]){
 
 	else if(!strcmp(tokens[0],"history")){ //	implement history
 		list_for_each_entry(cursor,&history,list){
-			fprintf(stderr,"%2d: %s\n",cursor->history_num, cursor->history_command);
+			fprintf(stderr,"%2d: %s",cursor->history_num, cursor->history_command);
 		}
 	}//											implement history
 
