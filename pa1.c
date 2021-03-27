@@ -104,24 +104,16 @@ static int run_command(int nr_tokens, char *tokens[]){
         else if(pid == 0){ // childe process
             execvp(*tokens, tokens); // (file, array)
             fprintf(stderr,"Unable to execute %s\n", *tokens);
+			return 1;
         }
 		
         if((pid = waitpid(pid, &status, 0)) < 0) // parent process
 			fprintf(stderr, "waitpid error\n");
-			return 1;
+			
 	} // 										implement external command
 	
 	return -EINVAL;
 }
-/*
-static int find_command(){
-	list_for_each_entry_safe(cursor,cursorn,&history,list){
-
-	}
-
-	return 1;
-}
-*/
 
 /***********************************************************************
  * append_history()
