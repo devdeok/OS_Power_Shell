@@ -45,6 +45,7 @@ struct entry *cursor;
 struct entry *cursorn;
 int tempint = 1;
 
+static int __process_command(char * command);
 /***********************************************************************
  * run_command()
  *
@@ -89,8 +90,10 @@ static int run_command(int nr_tokens, char *tokens[]){
 	}//											implement history
 
 	else if(!strcmp(tokens[0],"!")){//			implement !
-		list_for_each_entry_safe(cursor,cursorn,&history,list){ // 끝까지 순회
-			
+		list_for_each_entry_safe(cursor,cursorn,&history,list){
+			if(cursor->history_num==atoi(tokens[1])){
+				__process_command(cursor->history_command);
+			}
 		}
 	}//											implement !
 
@@ -101,15 +104,24 @@ static int run_command(int nr_tokens, char *tokens[]){
         else if(pid == 0){ // childe process
             execvp(*tokens, tokens); // (file, array)
             fprintf(stderr,"Unable to execute %s\n", *tokens);
-            return 1;
         }
 		
         if((pid = waitpid(pid, &status, 0)) < 0) // parent process
 			fprintf(stderr, "waitpid error\n");
+			return 1;
 	} // 										implement external command
 	
 	return -EINVAL;
 }
+/*
+static int find_command(){
+	list_for_each_entry_safe(cursor,cursorn,&history,list){
+
+	}
+
+	return 1;
+}
+*/
 
 /***********************************************************************
  * append_history()
@@ -120,9 +132,6 @@ static int run_command(int nr_tokens, char *tokens[]){
  */
 static void append_history(char * const command)
 {
-	// history를 linked list로 구현해서 안에 command 쌓아나가기
-	// pa0 참고하면 좋을듯
-	// 리스트헤드의 항목으로 char*넣어서 command저장하기
 	// 명령어는 ! <숫자> 숫자에 있는 command 실행
 	
 
