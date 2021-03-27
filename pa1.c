@@ -64,7 +64,7 @@ static int run_command(int nr_tokens, char *tokens[]){
 	pid_t pid;
 	int status;
 
-	fprintf(stderr,"%d %s %s  \n",nr_tokens,tokens[0],tokens[1]);
+	// fprintf(stderr,"%d %s %s  \n",nr_tokens,tokens[0],tokens[1]);
 
 	if (strcmp(tokens[0], "exit") == 0) return 0; //command가 exit이면 종료
 
@@ -84,7 +84,7 @@ static int run_command(int nr_tokens, char *tokens[]){
 
 	else if(!strcmp(tokens[0],"history")){ //	implement history
 		list_for_each_entry(cursor,&history,list){
-			fprintf(stderr,"%2d: %s asd  \n",cursor->history_num, cursor->history_command);
+			fprintf(stderr,"%2d: %s\n",cursor->history_num, cursor->history_command);
 		}
 	}//											implement history
 
