@@ -27,6 +27,9 @@
 
 #include <wait.h>
 
+#define READ_END 0
+#define WRITE_END 1
+
 /***********************************************************************
  * struct list_head history
  *
@@ -40,6 +43,8 @@ struct entry{
 	char* command;
 	int index;
 };
+
+int pipecheck=0;
 
 static int __process_command(char * command);
 /***********************************************************************
@@ -56,6 +61,10 @@ static int __process_command(char * command);
  */
 static int run_command(int nr_tokens, char *tokens[]){
 	// pipe 구현하기 |
+
+	for(int i=0;i<nr_tokens;i++){ // pipe인지 체크 pipe면 1 아니면 0
+		if(!strcmp(tokens[i],"|")) pipecheck++;
+	}
 
 	struct entry *cursor;
 
@@ -79,11 +88,11 @@ static int run_command(int nr_tokens, char *tokens[]){
 	else if(!strcmp(tokens[0],"history")){ //		implement history
 		list_for_each_entry(cursor,&history,list){
 			fprintf(stderr,"%2d: %s",cursor->index, cursor->command);
-		} // history 출력할 때 이상한거 붙어있음, 이거 코드 좀 봐야할듯
+		}// history를 입력하면서 맨 앞에 !가 붙음
 		return 1;
 	}//												implement history
 
-	else if(!strcmp(tokens[0],"!") && nr_tokens>1){//implement !
+	else if(!strcmp(tokens[0],"!")){//implement !
 		char* tempstr = malloc(sizeof(char)*MAX_COMMAND_LEN);
 
 		list_for_each_entry(cursor,&history,list){
@@ -99,29 +108,86 @@ static int run_command(int nr_tokens, char *tokens[]){
 
 	else{ // 						implement external command & pipe
 		pid_t pid;
-		int pipefd[2];
-		int status;
 
-		// if(pipe(pipefd)==-1){ // create the pipe
-		// 	fprintf(stderr,"pipe error");
-		// 	exit(1);
-		// }
+		if(pipecheck){ // pipe일 경우
+			int temp;
+			char* first[nr_tokens];
+			char* second[nr_tokens];
+			int fint=0,sint=0;
 
-		
-        pid = fork();
-		
-        if(pid == 0){ // child process
-            execvp(*tokens, tokens); // (file, array)
-            fprintf(stderr,"Unable to execute %s\n", *tokens);
-			exit(1);
-        }
-        else{ // parent process
-			pid = waitpid(pid, &status, 0); 
-		}
+			int pipefd[2];
+
+
+			for(int i=0;i<nr_tokens;i++){
+				if(!strcmp(tokens[i],"|"))
+					temp = i;
+			} // | 이거 들어간 인덱스
+			
+			for(int j=0;j<nr_tokens;j++){
+				if(j<temp){
+					first[fint++] = tokens[j];
+				}
+				else if(j>temp){
+					second[sint++] = tokens[j];
+				}
+			}
+			first[fint] = NULL;
+			second[sint] = NULL;
+
+			pipe(pipefd);
+    		pid = fork();
+			
+			if(pid==0){ // child process
+				dup2(pipefd[WRITE_END], STDOUT_FILENO);
+				close(pipefd[READ_END]);
+				close(pipefd[WRITE_END]);
+				execvp(first[0], first);
+				fprintf(stderr, "Failed to execute '%s'\n", first);
+				exit(1);
+			} // child process
+
+			else{ // parent process
+       			pid=fork();
+
+				if(pid==0){
+					dup2(pipefd[READ_END], STDIN_FILENO);
+					close(pipefd[WRITE_END]);
+					close(pipefd[READ_END]);
+					execvp(second[0], second);
+					fprintf(stderr, "Failed to execute '%s'\n", second);
+					exit(1);
+				}
+				else{
+					int status;
+					close(pipefd[READ_END]);
+					close(pipefd[WRITE_END]);
+					waitpid(pid, &status, 0);
+				}
+			} // parent process
+
+		} // pipe일 경우
+
+		else{	// pipe가 아닐 경우
+			int pipefd[2];
+			int status;
+
+			pid = fork();
+			
+			if(pid == 0){ // child process
+				execvp(*tokens, tokens); // (file, array)
+				fprintf(stderr,"Unable to execute %s\n", *tokens);
+				exit(1);
+			}
+			else{ // parent process
+				pid = waitpid(pid, &status, 0); 
+			}
+		} // pipe가 아닐 경우
 	} // 							implement external command & pipe
-	
 	return -EINVAL;
-}
+} // run_command
+
+// #define READ_END 0
+// #define WRITE_END 1
 
 /***********************************************************************
  * append_history()
