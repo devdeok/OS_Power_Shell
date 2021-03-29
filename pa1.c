@@ -41,10 +41,6 @@ struct entry{
 	int index;
 };
 
-struct entry *cursor;
-struct entry *cursorn;
-int tempint = 0;
-
 static int __process_command(char * command);
 /***********************************************************************
  * run_command()
@@ -59,14 +55,13 @@ static int __process_command(char * command);
  *   Return <0 on error
  */
 static int run_command(int nr_tokens, char *tokens[]){
-	// ! <숫자> 구현하기 -> pa0참조
 	// pipe 구현하기 |
-	pid_t pid;
-	int status;
+
+	struct entry *cursor;
 
 	if (strcmp(tokens[0], "exit") == 0) return 0;
 
-	else if (!strcmp(tokens[0],"cd")){ // 		implement change directory
+	else if (!strcmp(tokens[0],"cd")){ // 	implement change directory
 		if(nr_tokens > 1){ // cd ~~
 			if(!strcmp(tokens[1],"~")){ //move home directory
 				chdir(getenv("HOME"));
@@ -78,41 +73,52 @@ static int run_command(int nr_tokens, char *tokens[]){
 		else{ //input only command cd
 				chdir(getenv("HOME"));
 		}
-	}//  										implement change directory
+		return 1;
+	}//  									implement change directory
 
-	else if(!strcmp(tokens[0],"history")){ //	implement history
+	else if(!strcmp(tokens[0],"history")){ //		implement history
 		list_for_each_entry(cursor,&history,list){
 			fprintf(stderr,"%2d: %s",cursor->index, cursor->command);
-		} // history 출력할 때 이상한거 붙어있음
-	}//											implement history
+		} // history 출력할 때 이상한거 붙어있음, 이거 코드 좀 봐야할듯
+		return 1;
+	}//												implement history
 
 	else if(!strcmp(tokens[0],"!") && nr_tokens>1){//implement !
 		char* tempstr = malloc(sizeof(char)*MAX_COMMAND_LEN);
 
-		list_for_each_entry_safe(cursor,cursorn,&history,list){
+		list_for_each_entry(cursor,&history,list){
 			if(cursor->index==atoi(tokens[1])){
 				strcpy(tempstr, cursor->command);
 			}
 		}// list_for_each_safe
 		__process_command(tempstr);
 		free(tempstr);
+
+		return 1;
 	}//												implement !
 
-	//implement pipe
-	
-	//implement pipe
+	else{ // 						implement external command & pipe
+		pid_t pid;
+		int pipefd[2];
+		int status;
 
-	else{ // 									implement external command
+		// if(pipe(pipefd)==-1){ // create the pipe
+		// 	fprintf(stderr,"pipe error");
+		// 	exit(1);
+		// }
+
+		
         pid = fork();
-
-        if(pid == 0){ // childe process
+		
+        if(pid == 0){ // child process
             execvp(*tokens, tokens); // (file, array)
             fprintf(stderr,"Unable to execute %s\n", *tokens);
-			return 1;
+			exit(1);
         }
-		
-        pid = waitpid(pid, &status, 0); // parent process
-	} // 										implement external command
+        else{ // parent process
+			pid = waitpid(pid, &status, 0); 
+		}
+	} // 							implement external command & pipe
 	
 	return -EINVAL;
 }
@@ -124,6 +130,9 @@ static int run_command(int nr_tokens, char *tokens[]){
  *   Append @command into the history. The appended command can be later
  *   recalled with "!" built-in command
  */
+
+int tempint = 0;
+
 static void append_history(char * const command)
 {
 	// 명령어는 ! <숫자> 숫자에 있는 command 실행
