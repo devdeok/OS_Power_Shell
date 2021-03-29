@@ -60,17 +60,17 @@ static int __process_command(char * command);
  *   Return <0 on error
  */
 static int run_command(int nr_tokens, char *tokens[]){
-	// pipe 구현하기 |
 
 	for(int i=0;i<nr_tokens;i++){ // pipe인지 체크 pipe면 1 아니면 0
 		if(!strcmp(tokens[i],"|")) pipecheck++;
 	}
 
-	struct entry *cursor;
+	struct entry *cursor_h; // history용
+	struct entry *cursor_b; // command !용
 
 	if (strcmp(tokens[0], "exit") == 0) return 0;
 
-	else if (!strcmp(tokens[0],"cd")){ // 	implement change directory
+	else if (!strcmp(tokens[0],"cd")){ //	implement change directory
 		if(nr_tokens > 1){ // cd ~~
 			if(!strcmp(tokens[1],"~")){ //move home directory
 				chdir(getenv("HOME"));
@@ -85,28 +85,29 @@ static int run_command(int nr_tokens, char *tokens[]){
 		return 1;
 	}//  									implement change directory
 
-	else if(!strcmp(tokens[0],"history")){ //		implement history
-		list_for_each_entry(cursor,&history,list){
-			fprintf(stderr,"%2d: %s",cursor->index, cursor->command);
+	else if(!strcmp(tokens[0],"history")){ //	implement history
+		list_for_each_entry(cursor_h,&history,list){
+			fprintf(stderr,"%2d: %s",cursor_h->index, cursor_h->command);
 		}// history를 입력하면서 맨 앞에 !가 붙음
 		return 1;
-	}//												implement history
+	}//											implement history
 
-	else if(!strcmp(tokens[0],"!")){//implement !
+	else if(!strcmp(tokens[0],"!")){//	implement !
 		char* tempstr = malloc(sizeof(char)*MAX_COMMAND_LEN);
 
-		list_for_each_entry(cursor,&history,list){
-			if(cursor->index==atoi(tokens[1])){
-				strcpy(tempstr, cursor->command);
+		list_for_each_entry(cursor_b,&history,list){
+			if(cursor_b->index==atoi(tokens[1])){
+				strcpy(tempstr, cursor_b->command);
 			}
-		}// list_for_each_safe
+		}// list_for_each_entry
 		__process_command(tempstr);
+
 		free(tempstr);
 
 		return 1;
-	}//												implement !
+	}//									implement !
 
-	else{ // 						implement external command & pipe
+	else{ //	implement external command & pipe
 		pid_t pid;
 
 		if(pipecheck){ // pipe일 경우
@@ -117,11 +118,10 @@ static int run_command(int nr_tokens, char *tokens[]){
 
 			int pipefd[2];
 
-
-			for(int i=0;i<nr_tokens;i++){
+			for(int i=0;i<nr_tokens;i++){ // for
 				if(!strcmp(tokens[i],"|"))
 					temp = i;
-			} // | 이거 들어간 인덱스
+			} // | 이거 들어간 인덱스 찾기
 			
 			for(int j=0;j<nr_tokens;j++){
 				if(j<temp){
@@ -130,7 +130,8 @@ static int run_command(int nr_tokens, char *tokens[]){
 				else if(j>temp){
 					second[sint++] = tokens[j];
 				}
-			}
+			}// | 이거 기준으로 문자열 나누기
+
 			first[fint] = NULL;
 			second[sint] = NULL;
 
@@ -182,12 +183,10 @@ static int run_command(int nr_tokens, char *tokens[]){
 				pid = waitpid(pid, &status, 0); 
 			}
 		} // pipe가 아닐 경우
-	} // 							implement external command & pipe
+	} // 		implement external command & pipe
+
 	return -EINVAL;
 } // run_command
-
-// #define READ_END 0
-// #define WRITE_END 1
 
 /***********************************************************************
  * append_history()
@@ -197,7 +196,7 @@ static int run_command(int nr_tokens, char *tokens[]){
  *   recalled with "!" built-in command
  */
 
-int tempint = 0;
+int tempint = 0; // history index
 
 static void append_history(char * const command)
 {
