@@ -64,8 +64,6 @@ static int run_command(int nr_tokens, char *tokens[]){
 	pid_t pid;
 	int status;
 
-	// fprintf(stderr,"%d %s %s  \n",nr_tokens,tokens[0],tokens[1]);
-
 	if (strcmp(tokens[0], "exit") == 0) return 0; //command가 exit이면 종료
 
 	else if (!strcmp(tokens[0],"cd")){ // 		implement change directory
@@ -77,7 +75,7 @@ static int run_command(int nr_tokens, char *tokens[]){
 				chdir(tokens[1]);
 			}
 		}
-		else{ //cd만 입력했을 경우
+		else{ //inut only command cd
 				chdir(getenv("HOME"));
 		}
 	}//  										implement change directory
@@ -88,27 +86,32 @@ static int run_command(int nr_tokens, char *tokens[]){
 		}
 	}//											implement history
 
-	else if(!strcmp(tokens[0],"!")){//			implement !
+	else if(!strcmp(tokens[0],"!") && nr_tokens>1){//			implement !
+		char* tempstr = malloc(sizeof(char)*MAX_COMMAND_LEN);
+
 		list_for_each_entry_safe(cursor,cursorn,&history,list){
 			if(cursor->history_num==atoi(tokens[1])){
-				__process_command(cursor->history_command);
+				strcpy(tempstr, cursor->history_command);
 			}
-		}
+		}// list_for_each_safe
+		__process_command(tempstr);
+		free(tempstr);
 	}//											implement !
 
+	//implement pipe
+	
+	//implement pipe
+
 	else{ // 									implement external command
-        if((pid = fork()) < 0){
-            fprintf(stderr,"fork error");
-        }
-        else if(pid == 0){ // childe process
+        pid = fork();
+
+        if(pid == 0){ // childe process
             execvp(*tokens, tokens); // (file, array)
             fprintf(stderr,"Unable to execute %s\n", *tokens);
 			return 1;
         }
 		
-        if((pid = waitpid(pid, &status, 0)) < 0) // parent process
-			fprintf(stderr, "waitpid error\n");
-			
+        pid = waitpid(pid, &status, 0); // parent process
 	} // 										implement external command
 	
 	return -EINVAL;
