@@ -37,8 +37,8 @@ LIST_HEAD(history);
 
 struct entry{	
 	struct list_head list;
-	char* history_command;
-	int history_num;
+	char* command;
+	int index;
 };
 
 struct entry *cursor;
@@ -64,39 +64,39 @@ static int run_command(int nr_tokens, char *tokens[]){
 	pid_t pid;
 	int status;
 
-	if (strcmp(tokens[0], "exit") == 0) return 0; //command가 exit이면 종료
+	if (strcmp(tokens[0], "exit") == 0) return 0;
 
 	else if (!strcmp(tokens[0],"cd")){ // 		implement change directory
 		if(nr_tokens > 1){ // cd ~~
-			if(!strcmp(tokens[1],"~")){ // move home directory
+			if(!strcmp(tokens[1],"~")){ //move home directory
 				chdir(getenv("HOME"));
 			}
 			else{ // input specify directory
 				chdir(tokens[1]);
 			}
 		}
-		else{ //inut only command cd
+		else{ //input only command cd
 				chdir(getenv("HOME"));
 		}
 	}//  										implement change directory
 
 	else if(!strcmp(tokens[0],"history")){ //	implement history
 		list_for_each_entry(cursor,&history,list){
-			fprintf(stderr,"%2d: %s",cursor->history_num, cursor->history_command);
-		}
+			fprintf(stderr,"%2d: %s",cursor->index, cursor->command);
+		} // history 출력할 때 이상한거 붙어있음
 	}//											implement history
 
-	else if(!strcmp(tokens[0],"!") && nr_tokens>1){//			implement !
+	else if(!strcmp(tokens[0],"!") && nr_tokens>1){//implement !
 		char* tempstr = malloc(sizeof(char)*MAX_COMMAND_LEN);
 
 		list_for_each_entry_safe(cursor,cursorn,&history,list){
-			if(cursor->history_num==atoi(tokens[1])){
-				strcpy(tempstr, cursor->history_command);
+			if(cursor->index==atoi(tokens[1])){
+				strcpy(tempstr, cursor->command);
 			}
 		}// list_for_each_safe
 		__process_command(tempstr);
 		free(tempstr);
-	}//											implement !
+	}//												implement !
 
 	//implement pipe
 	
@@ -127,18 +127,15 @@ static int run_command(int nr_tokens, char *tokens[]){
 static void append_history(char * const command)
 {
 	// 명령어는 ! <숫자> 숫자에 있는 command 실행
-	
-
-	char* tempstr = malloc(sizeof(char)*MAX_COMMAND_LEN);
-	strcpy(tempstr, command);
 
 	struct entry *temp = (struct entry *)malloc(sizeof(struct list_head));
-	temp->history_command = (char*)malloc(sizeof(char)*(strlen(command)));
+	temp->command = (char*)malloc(sizeof(char)*(strlen(command)));
 
-	temp->history_num = tempint;
-	strcpy(temp->history_command,tempstr);
+	temp->index = tempint;
+	strcpy(temp->command,command);
 	INIT_LIST_HEAD(&temp->list);
 	list_add_tail(&temp->list, &history);
+
 	tempint++;
 }
 
