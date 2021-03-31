@@ -44,9 +44,8 @@ struct entry{
 	int index;
 };
 
-int pipecheck=0;
-
 static int __process_command(char * command);
+
 /***********************************************************************
  * run_command()
  *
@@ -60,7 +59,8 @@ static int __process_command(char * command);
  *   Return <0 on error
  */
 static int run_command(int nr_tokens, char *tokens[]){
-
+	int pipecheck=0;
+	
 	for(int i=0;i<nr_tokens;i++){ // pipe인지 체크 pipe면 1 아니면 0
 		if(!strcmp(tokens[i],"|")) pipecheck++;
 	}
@@ -87,7 +87,9 @@ static int run_command(int nr_tokens, char *tokens[]){
 
 	else if(!strcmp(tokens[0],"history")){ //	implement history
 		list_for_each_entry(cursor_h,&history,list){
-			fprintf(stderr,"%2d: %s",cursor_h->index, cursor_h->command);
+			// fprintf(stderr,"%2d: %s",cursor_h->index, cursor_h->command);
+			printf("%2d: %s",cursor_h->index, cursor_h->command);
+			
 		}// history를 입력하면서 맨 앞에 !가 붙음
 		return 1;
 	}//											implement history
@@ -116,8 +118,6 @@ static int run_command(int nr_tokens, char *tokens[]){
 			char* second[nr_tokens];
 			int fint=0,sint=0;
 
-			int pipefd[2];
-
 			for(int i=0;i<nr_tokens;i++){ // for
 				if(!strcmp(tokens[i],"|"))
 					temp = i;
@@ -135,12 +135,13 @@ static int run_command(int nr_tokens, char *tokens[]){
 			first[fint] = NULL;
 			second[sint] = NULL;
 
+			int pipefd[2];
 			pipe(pipefd);
     		pid = fork();
 			
 			if(pid==0){ // child process
-				dup2(pipefd[WRITE_END], STDOUT_FILENO);
 				close(pipefd[READ_END]);
+				dup2(pipefd[WRITE_END], STDOUT_FILENO);
 				close(pipefd[WRITE_END]);
 				execvp(first[0], first);
 				fprintf(stderr, "Failed to execute '%s'\n", first);
@@ -151,8 +152,8 @@ static int run_command(int nr_tokens, char *tokens[]){
        			pid=fork();
 
 				if(pid==0){
-					dup2(pipefd[READ_END], STDIN_FILENO);
 					close(pipefd[WRITE_END]);
+					dup2(pipefd[READ_END], STDIN_FILENO);
 					close(pipefd[READ_END]);
 					execvp(second[0], second);
 					fprintf(stderr, "Failed to execute '%s'\n", second);
@@ -169,7 +170,6 @@ static int run_command(int nr_tokens, char *tokens[]){
 		} // pipe일 경우
 
 		else{	// pipe가 아닐 경우
-			int pipefd[2];
 			int status;
 
 			pid = fork();
