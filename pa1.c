@@ -87,19 +87,18 @@ static int run_command(int nr_tokens, char *tokens[]){
 
 	else if(!strcmp(tokens[0],"history")){ //	implement history
 		list_for_each_entry(cursor_h,&history,list){
-			// fprintf(stderr,"%2d: %s",cursor_h->index, cursor_h->command);
-			printf("%2d: %s",cursor_h->index, cursor_h->command);
-			
-		}// history를 입력하면서 맨 앞에 !가 붙음
+			fprintf(stderr,"%2d: %s",cursor_h->index, cursor_h->command);
+		}// history를 입력하면서 맨 앞에 !가 붙음..
 		return 1;
 	}//											implement history
 
-	else if(!strcmp(tokens[0],"!")){//	implement !
+	else if(!strcmp(tokens[0],"!")){//	implement ! command
 		char* tempstr = malloc(sizeof(char)*MAX_COMMAND_LEN);
 
 		list_for_each_entry(cursor_b,&history,list){
 			if(cursor_b->index==atoi(tokens[1])){
 				strcpy(tempstr, cursor_b->command);
+				
 			}
 		}// list_for_each_entry
 		__process_command(tempstr);
@@ -107,10 +106,11 @@ static int run_command(int nr_tokens, char *tokens[]){
 		free(tempstr);
 
 		return 1;
-	}//									implement !
+	}//									implement ! command
 
 	else{ //	implement external command & pipe
 		pid_t pid;
+		int status;
 
 		if(pipecheck){ // pipe일 경우
 			int temp;
@@ -141,10 +141,9 @@ static int run_command(int nr_tokens, char *tokens[]){
 			
 			if(pid==0){ // child process
 				close(pipefd[READ_END]);
-				dup2(pipefd[WRITE_END], STDOUT_FILENO);
-				close(pipefd[WRITE_END]);
-				execvp(first[0], first);
-				fprintf(stderr, "Failed to execute '%s'\n", first);
+				dup2(pipefd[WRITE_END], STDOUT_FILENO); // WRITE_END를 출력 지정
+				execvp(*first, first);
+				fprintf(stderr, "Unable to execute %s\n", first);
 				exit(1);
 			} // child process
 
@@ -153,16 +152,14 @@ static int run_command(int nr_tokens, char *tokens[]){
 
 				if(pid==0){
 					close(pipefd[WRITE_END]);
-					dup2(pipefd[READ_END], STDIN_FILENO);
-					close(pipefd[READ_END]);
-					execvp(second[0], second);
-					fprintf(stderr, "Failed to execute '%s'\n", second);
+					dup2(pipefd[READ_END], STDIN_FILENO); // READ_END를 입력 지정
+					execvp(*second, second);
+					fprintf(stderr, "Unable to execute %s\n", second);
 					exit(1);
 				}
 				else{
-					int status;
-					close(pipefd[READ_END]);
 					close(pipefd[WRITE_END]);
+					waitpid(pid, &status, 0);
 					waitpid(pid, &status, 0);
 				}
 			} // parent process
@@ -170,7 +167,6 @@ static int run_command(int nr_tokens, char *tokens[]){
 		} // pipe일 경우
 
 		else{	// pipe가 아닐 경우
-			int status;
 
 			pid = fork();
 			
